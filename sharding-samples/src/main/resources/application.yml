@@ -1,0 +1,32 @@
+spring:
+  shardingsphere:
+    datasource:
+      master-ds-0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url:
+        username:
+        password:
+      master-ds-1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url:
+        username:
+        password:
+      salve-ds-0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url:
+        username:
+        password:
+      salve-ds-1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url:
+        username:
+        password:
+      names: master-ds-0,master-ds-1,salve-ds-0,salve-ds-1
+    props:
+      sql.show: true
+  datasource:
+    initialization-mode: never
