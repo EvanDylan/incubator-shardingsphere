@@ -61,7 +61,14 @@ public abstract class BaseShardingEngine {
      */
     public SQLRouteResult shard(final String sql, final List<Object> parameters) {
         List<Object> clonedParameters = cloneParameters(parameters);
+        // 执行路由操作(其中隐含了SQL解析过程)
         SQLRouteResult result = route(sql, clonedParameters);
+        /**
+         * 这里分两种情况讨论:
+         * 1. 如果仅仅基于库做了分片,则原来的SQL不需要改写,直接发送给路由之后的实际数据源执行即可
+         * 2. 如果基于表做了分片,则需要将原来的SQL改写(实际的表名已经发生了变化),然后再发送给路由的数据源执行
+         * 这里添加的对象RouteUnit其抽象维度为数据源+SQL.
+         */
         result.getRouteUnits().addAll(HintManager.isDatabaseShardingOnly() ? convert(sql, clonedParameters, result) : rewriteAndConvert(sql, clonedParameters, result));
         if (shardingProperties.getValue(ShardingPropertiesConstant.SQL_SHOW)) {
             boolean showSimple = shardingProperties.getValue(ShardingPropertiesConstant.SQL_SIMPLE);

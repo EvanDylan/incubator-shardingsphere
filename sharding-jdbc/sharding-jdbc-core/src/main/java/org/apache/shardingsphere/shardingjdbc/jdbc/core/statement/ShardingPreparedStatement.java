@@ -167,8 +167,10 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     public boolean execute() throws SQLException {
         try {
             clearPrevious();
+            // 负责SQL解析、改写、路由等
             shard();
             initPreparedStatementExecutor();
+            // 对改写的SQL进行统一执行
             return preparedStatementExecutor.execute();
         } finally {
             clearBatch();
