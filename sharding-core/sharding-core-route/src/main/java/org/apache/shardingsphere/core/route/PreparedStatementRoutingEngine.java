@@ -61,8 +61,14 @@ public final class PreparedStatementRoutingEngine {
      */
     public SQLRouteResult route(final List<Object> parameters) {
         if (null == sqlStatement) {
+            // 解析SQL
             sqlStatement = shardingRouter.parse(logicSQL, true);
         }
+        /**
+         * 执行分片规则
+         * 1. 根据分库分表规则统计需要执行的SQL的实际数据库与表名
+         * 2. 根据读写分离规则再次过滤需要执行的SQL的实际数据与表名
+         */
         return masterSlaveRouter.route(shardingRouter.route(logicSQL, parameters, sqlStatement));
     }
 }

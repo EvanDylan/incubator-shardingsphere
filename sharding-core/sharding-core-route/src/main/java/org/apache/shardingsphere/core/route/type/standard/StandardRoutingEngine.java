@@ -68,6 +68,12 @@ public final class StandardRoutingEngine implements RoutingEngine {
    
     @Override
     public RoutingResult route() {
+        /**
+         * 过程步骤分为三步：
+         * 1. 根据逻辑表名通过分片规则筛选对应需要真正执行SQL的实际的物理表名
+         * 2. 根据已经筛选出的物理表名匹配需要执行SQL的实际物理库名
+         * 3. 将筛选的结果
+         */
         return generateRoutingResult(getDataNodes(shardingRule.getTableRule(logicTableName)));
     }
     

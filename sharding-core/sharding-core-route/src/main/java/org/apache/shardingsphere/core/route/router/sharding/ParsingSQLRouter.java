@@ -95,6 +95,12 @@ public final class ParsingSQLRouter implements ShardingRouter {
         if (generatedKey.isPresent()) {
             setGeneratedKeys(result, generatedKey.get());
         }
+        /**
+         * 对于子查询需要校验分片规则
+         * 1. 必须存在分片字段
+         * 2. 分片必须是同一个字段
+         * 如果存在多个相同的分片字段则需要合并
+         */
         boolean needMerge = false;
         if (sqlStatement instanceof SelectStatement) {
             needMerge = isNeedMergeShardingValues((SelectStatement) sqlStatement);
@@ -103,7 +109,12 @@ public final class ParsingSQLRouter implements ShardingRouter {
             checkSubqueryShardingValues(sqlStatement, optimizeResult.getShardingConditions());
             mergeShardingValues(optimizeResult.getShardingConditions());
         }
+        /**
+         * 根据分库分表规则统计需要执行的SQL的实际数据库与表名
+         */
         RoutingResult routingResult = RoutingEngineFactory.newInstance(shardingRule, shardingMetaData.getDataSource(), sqlStatement, optimizeResult).route();
+
+        // 改写SQL的limit
         if (sqlStatement instanceof SelectStatement && null != ((SelectStatement) sqlStatement).getLimit() && !routingResult.isSingleRouting()) {
             result.setLimit(getProcessedLimit(parameters, (SelectStatement) sqlStatement));
         }

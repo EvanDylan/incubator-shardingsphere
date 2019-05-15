@@ -61,32 +61,39 @@ public final class RoutingEngineFactory {
     public static RoutingEngine newInstance(final ShardingRule shardingRule,
                                             final ShardingDataSourceMetaData shardingDataSourceMetaData, final SQLStatement sqlStatement, final OptimizeResult optimizeResult) {
         Collection<String> tableNames = sqlStatement.getTables().getTableNames();
+        // 事务控制语句commit、rollback等
         if (SQLType.TCL == sqlStatement.getType()) {
             return new DatabaseBroadcastRoutingEngine(shardingRule);
         }
+        // CREATE, ALTER, DROP, TRUNCATE等
         if (SQLType.DDL == sqlStatement.getType()) {
             return new TableBroadcastRoutingEngine(shardingRule, sqlStatement);
         }
+        // Database administrator Language
         if (SQLType.DAL == sqlStatement.getType()) {
             return getDALRoutingEngine(shardingRule, sqlStatement, tableNames);
         }
+        // Database control Language
         if (SQLType.DCL == sqlStatement.getType()) {
             return getDCLRoutingEngine(shardingRule, sqlStatement, shardingDataSourceMetaData);
         }
+        // 是否属于默认数据源,区别于分片之后的数据源
         if (shardingRule.isAllInDefaultDataSource(tableNames)) {
             return new DefaultDatabaseRoutingEngine(shardingRule, tableNames);
         }
+        // 广播表
         if (shardingRule.isAllBroadcastTables(tableNames)) {
             return SQLType.DQL == sqlStatement.getType() ? new UnicastRoutingEngine(shardingRule, tableNames) : new DatabaseBroadcastRoutingEngine(shardingRule);
         }
         if (optimizeResult.getShardingConditions().isAlwaysFalse() || tableNames.isEmpty()) {
             return new UnicastRoutingEngine(shardingRule, tableNames);
         }
+        // 如果分片表数量为1或者分片的表分片逻辑相同（绑定关系）
         Collection<String> shardingTableNames = shardingRule.getShardingLogicTableNames(tableNames);
         if (1 == shardingTableNames.size() || shardingRule.isAllBindingTables(shardingTableNames)) {
             return new StandardRoutingEngine(sqlStatement, shardingRule, shardingTableNames.iterator().next(), optimizeResult);
         }
-        // TODO config for cartesian set
+        // 更为复杂的情况,同时存在多个分片字段,并且分片逻辑不一样
         return new ComplexRoutingEngine(sqlStatement, shardingRule, tableNames, optimizeResult);
     }
     
