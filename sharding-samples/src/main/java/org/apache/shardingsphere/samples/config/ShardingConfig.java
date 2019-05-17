@@ -7,10 +7,7 @@ import org.apache.shardingsphere.api.config.sharding.KeyGeneratorConfiguration;
 import org.apache.shardingsphere.api.config.sharding.ShardingRuleConfiguration;
 import org.apache.shardingsphere.api.config.sharding.TableRuleConfiguration;
 import org.apache.shardingsphere.api.config.sharding.strategy.InlineShardingStrategyConfiguration;
-import org.apache.shardingsphere.core.rule.MasterSlaveRule;
 import org.apache.shardingsphere.shardingjdbc.api.ShardingDataSourceFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,6 +52,7 @@ public class ShardingConfig {
         shardingRuleConfig.getTableRuleConfigs().add(getOrderItemTableRuleConfiguration());
         shardingRuleConfig.setMasterSlaveRuleConfigs(getMasterSlaveRuleConfigurations());
         shardingRuleConfig.getBindingTableGroups().add("t_order, t_order_item");
+        shardingRuleConfig.setBroadcastTables(Collections.singleton("core_category"));
         Properties properties = new Properties();
         properties.setProperty("sql.show", "true");
         return ShardingDataSourceFactory.createDataSource(createDataSourceMap(), shardingRuleConfig, properties);
@@ -88,6 +86,42 @@ public class ShardingConfig {
         orderTableRuleConfig.setKeyGeneratorConfig(new KeyGeneratorConfiguration("SNOWFLAKE", "order_item_id"));
         return orderTableRuleConfig;
     }
+
+//    /**
+//     * t_order_item分表规则
+//     * @return
+//     */
+//    private TableRuleConfiguration getOrderItemTableRuleConfiguration() {
+//        TableRuleConfiguration orderTableRuleConfig =
+//                new TableRuleConfiguration("t_order_item");
+//        orderTableRuleConfig.setDatabaseShardingStrategyConfig(new ComplexShardingStrategyConfiguration("user_id", new ComplexKeysShardingAlgorithm<Long>() {
+//            @Override
+//            public Collection<String> doSharding(Collection<String> availableTargetNames, ComplexKeysShardingValue<Long> shardingValue) {
+//                Collection<String> selected = Lists.newArrayList();
+//                for (String dataSourceName : availableTargetNames) {
+//
+//
+////                    for (Map.Entry<String, Collection<Long>> entry : shardingValue.getColumnNameAndShardingValuesMap().entrySet()) {
+////
+////
+////
+////                    }
+////
+////                    String targetDataSource = "ds-" + new Long(shardingValue % 2).toString();
+////
+////
+////                    if (StringUtils.equals(dataSourceName, targetDataSource)) {
+////
+////                    }
+//                }
+//                return selected;
+//            }
+//        }));
+//        orderTableRuleConfig.setTableShardingStrategyConfig(
+//                new InlineShardingStrategyConfiguration("order_id", "t_order_item_${order_id % 2}"));
+//        orderTableRuleConfig.setKeyGeneratorConfig(new KeyGeneratorConfiguration("SNOWFLAKE", "order_item_id"));
+//        return orderTableRuleConfig;
+//    }
 
     private List<MasterSlaveRuleConfiguration> getMasterSlaveRuleConfigurations() {
         return Lists.newArrayList(

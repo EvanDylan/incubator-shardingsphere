@@ -1,8 +1,8 @@
 package org.apache.shardingsphere.samples;
 
-import org.apache.shardingsphere.core.util.NumberUtil;
 import org.apache.shardingsphere.samples.po.Order;
 import org.apache.shardingsphere.samples.po.OrderItem;
+import org.apache.shardingsphere.samples.repository.CategoryMapper;
 import org.apache.shardingsphere.samples.repository.OrderItemMapper;
 import org.apache.shardingsphere.samples.repository.OrderMapper;
 import org.mybatis.spring.annotation.MapperScan;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Random;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @MapperScan("org.apache.shardingsphere.samples.repository")
@@ -28,6 +27,9 @@ public class Application {
 
     @Autowired
     private OrderItemMapper orderItemMapper;
+
+    @Autowired
+    private CategoryMapper categoryMapper;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -42,6 +44,11 @@ public class Application {
     public List<Order> queryOrder(@RequestParam(name = "pageNum", required = false, defaultValue = "0")Integer pageNum,
                                   @RequestParam(name = "pageSize", required = false, defaultValue = "10")Integer pageSize) {
         return orderMapper.query(pageNum, pageSize);
+    }
+
+    @GetMapping("delete")
+    public void delete() {
+        categoryMapper.deleteById(14L);
     }
 
     @GetMapping("/orders/all")

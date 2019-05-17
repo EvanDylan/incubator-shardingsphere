@@ -88,9 +88,16 @@ public final class StandardRoutingEngine implements RoutingEngine {
     }
     
     private Collection<DataNode> getDataNodes(final TableRule tableRule) {
+        /**
+         * 是否为Hint方式分片
+         * 区别于通过SQL解析的方式确定分片策略,通过Hint手动指定的方式
+         */
         if (shardingRule.isRoutingByHint(tableRule)) {
             return routeByHint(tableRule);
         }
+        /**
+         * 是否为通过条件分片
+         */
         if (isRoutingByShardingConditions(tableRule)) {
             return routeByShardingConditions(tableRule);
         }
