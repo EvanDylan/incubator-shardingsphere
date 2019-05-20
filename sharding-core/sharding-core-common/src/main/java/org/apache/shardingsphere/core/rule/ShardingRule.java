@@ -180,13 +180,16 @@ public class ShardingRule implements BaseRule {
      * @return table rule
      */
     public TableRule getTableRule(final String logicTableName) {
+        // 根据逻辑表名,匹配实际表以及其对应的物理库名等信息
         Optional<TableRule> tableRule = findTableRule(logicTableName);
         if (tableRule.isPresent()) {
             return tableRule.get();
         }
+        // 是否为广播表
         if (isBroadcastTable(logicTableName)) {
             return new TableRule(shardingDataSourceNames.getDataSourceNames(), logicTableName);
         }
+        // 如果前两者都不是,并且默认数据源不为空
         if (!Strings.isNullOrEmpty(shardingDataSourceNames.getDefaultDataSourceName())) {
             return new TableRule(shardingDataSourceNames.getDefaultDataSourceName(), logicTableName);
         }
