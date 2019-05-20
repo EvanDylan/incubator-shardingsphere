@@ -169,6 +169,7 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
             clearPrevious();
             // 负责SQL解析、改写、路由等
             shard();
+            // 初始化执行器
             initPreparedStatementExecutor();
             // 对改写的SQL进行统一执行
             return preparedStatementExecutor.execute();

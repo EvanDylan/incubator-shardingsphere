@@ -39,7 +39,10 @@ import java.util.Properties;
  */
 @Getter
 public class ShardingDataSource extends AbstractDataSourceAdapter {
-    
+
+    /**
+     * 保持分库分表规则、数据源等上下文信息
+     */
     private final ShardingContext shardingContext;
     
     public ShardingDataSource(final Map<String, DataSource> dataSourceMap, final ShardingRule shardingRule) throws SQLException {
@@ -57,7 +60,10 @@ public class ShardingDataSource extends AbstractDataSourceAdapter {
             Preconditions.checkArgument(!(each instanceof MasterSlaveDataSource), "Initialized data sources can not be master-slave data sources.");
         }
     }
-    
+
+    /**
+     * 创建被装饰过之后的数据连接
+     */
     @Override
     public final ShardingConnection getConnection() {
         return new ShardingConnection(getDataSourceMap(), shardingContext, getShardingTransactionManagerEngine(), TransactionTypeHolder.get());
