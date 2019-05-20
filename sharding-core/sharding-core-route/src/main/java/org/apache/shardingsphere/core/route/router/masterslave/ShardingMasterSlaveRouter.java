@@ -55,18 +55,30 @@ public final class ShardingMasterSlaveRouter {
         Collection<TableUnit> toBeRemoved = new LinkedList<>();
         Collection<TableUnit> toBeAdded = new LinkedList<>();
         for (TableUnit each : sqlRouteResult.getRoutingResult().getTableUnits().getTableUnits()) {
+            // 判断是否为同一个逻辑数据源,不同则跳过
             if (!masterSlaveRule.getName().equalsIgnoreCase(each.getDataSourceName())) {
                 continue;
             }
+            // 移除当前each,因为当前each中保持的数据源还是逻辑库
             toBeRemoved.add(each);
             String actualDataSourceName;
+            /**
+             * 判断是否主库：
+             * 1. 不是DQL(Data Query Language)
+             * 2. 通过一个线程上次是否访问了主库(由ThreadLocal保持)
+             * 3. 通过Hint方式直接指定访问主库
+             */
             if (isMasterRoute(sqlRouteResult.getSqlStatement().getType())) {
+                // 在ThreadLocal中设定标识,标记当前线程访问主库,那么后续当前线程的访问都会强制走主库
                 MasterVisitedManager.setMasterVisited();
+                // 获取逻辑数据源对应的主库真是数据源
                 actualDataSourceName = masterSlaveRule.getMasterDataSourceName();
             } else {
+                // 如果需要访问主库,通过轮训算法筛选一个从库数据源
                 actualDataSourceName = masterSlaveRule.getLoadBalanceAlgorithm().getDataSource(
                         masterSlaveRule.getName(), masterSlaveRule.getMasterDataSourceName(), new ArrayList<>(masterSlaveRule.getSlaveDataSourceNames()));
             }
+            // 创建包含真实的物理数据源
             toBeAdded.add(createNewTableUnit(actualDataSourceName, each));
         }
         sqlRouteResult.getRoutingResult().getTableUnits().getTableUnits().removeAll(toBeRemoved);
