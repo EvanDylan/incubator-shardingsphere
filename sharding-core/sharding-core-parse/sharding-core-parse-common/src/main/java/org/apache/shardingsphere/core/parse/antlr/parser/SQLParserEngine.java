@@ -48,6 +48,7 @@ public final class SQLParserEngine {
      * @return abstract syntax tree of SQL
      */
     public SQLAST parse() {
+        // SQL解析为语法树
         ParseTree parseTree = SQLParserFactory.newInstance(databaseType, sql).execute().getChild(0);
         if (parseTree instanceof ErrorNode) {
             throw new SQLParsingUnsupportedException(String.format("Unsupported SQL of `%s`", sql));

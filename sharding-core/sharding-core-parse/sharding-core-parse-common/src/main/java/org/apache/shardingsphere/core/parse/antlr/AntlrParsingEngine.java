@@ -64,6 +64,7 @@ public final class AntlrParsingEngine implements SQLParser {
     
     @Override
     public SQLStatement parse() {
+        // SQL解析为语法树
         SQLAST ast = parserEngine.parse();
         if (!ast.getSQLStatementRule().isPresent() && (parsingRuleRegistry instanceof EncryptParsingRuleRegistry)) {
             return new GeneralSQLStatement();

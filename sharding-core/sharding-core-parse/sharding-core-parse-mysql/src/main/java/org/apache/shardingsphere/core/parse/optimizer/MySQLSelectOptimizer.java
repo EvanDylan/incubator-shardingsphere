@@ -47,6 +47,13 @@ public final class MySQLSelectOptimizer implements SQLStatementOptimizer {
     
     @Override
     public void optimize(final SQLStatement sqlStatement, final ShardingTableMetaData shardingTableMetaData) {
+        /**
+         * 改写SQL补列
+         * 1. 使用AVG函数SELECT AVG(age) FROM user 需要改写成 SELECT SUM(age), COUNT(age) FROM user.最终在归并引擎
+         *    中进行二次计算才能得到准确的结果。
+         * 2. 使用GROUP BY和ORDER BY时为了保证结果准确性,结果归并时引擎需要通过GROUP BY和ORDER BY的字段项进行分组和排序，
+         *    但是如果原始SQL的选项中并未包含分组项和排序项,则需要对原始SQL进行改写增加确实的字段列
+         */
         appendDerivedColumns((SelectStatement) sqlStatement, shardingTableMetaData);
         appendDerivedOrderBy((SelectStatement) sqlStatement);
         postExtractInternal(sqlStatement);

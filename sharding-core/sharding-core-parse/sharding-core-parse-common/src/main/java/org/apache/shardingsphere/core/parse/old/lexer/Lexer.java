@@ -48,6 +48,7 @@ public class Lexer {
      * Analyse next token.
      */
     public final void nextToken() {
+        // 跳过空白字符、注释等
         skipIgnoredToken();
         if (isVariableBegin()) {
             currentToken = new Tokenizer(input, dictionary, offset).scanVariable();
@@ -72,11 +73,14 @@ public class Lexer {
     }
     
     private void skipIgnoredToken() {
+        // 跳过空白字符
         offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
+        // 跳过数据库特有的脚本,比如MySQL中以/*! */这种
         while (isHintBegin()) {
             offset = new Tokenizer(input, dictionary, offset).skipHint();
             offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
         }
+        // 跳过注释SQL注释
         while (isCommentBegin()) {
             offset = new Tokenizer(input, dictionary, offset).skipComment();
             offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
