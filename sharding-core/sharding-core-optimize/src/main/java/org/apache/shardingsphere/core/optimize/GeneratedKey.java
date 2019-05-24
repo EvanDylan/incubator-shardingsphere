@@ -58,10 +58,16 @@ public final class GeneratedKey {
      * @return generate key
      */
     public static Optional<GeneratedKey> getGenerateKey(final ShardingRule shardingRule, final List<Object> parameters, final InsertStatement insertStatement) {
+        // 根据配置获取需要生成ID的列名
         Optional<String> generateKeyColumnName = shardingRule.findGenerateKeyColumnName(insertStatement.getTables().getSingleTableName());
         if (!generateKeyColumnName.isPresent()) {
             return Optional.absent();
         }
+        /**
+         * isContainsGenerateKeyColumn 判断SQL语句是否已经包含了自增的列名
+         * 包含时：解析原SQL中自增ID列的参数值
+         * 不包含时：根据配置获取需要自动生成ID的列名,并使用提供的ID生成算法生成ID(如果没有提供则使用默认算法)
+         */
         return isContainsGenerateKeyColumn(insertStatement, generateKeyColumnName.get()) 
                 ? findGeneratedKey(parameters, insertStatement, generateKeyColumnName.get()) : Optional.of(createGeneratedKey(shardingRule, insertStatement, generateKeyColumnName.get()));
     }
@@ -118,7 +124,7 @@ public final class GeneratedKey {
         }
         return Optional.absent();
     }
-    
+
     private static GeneratedKey createGeneratedKey(final ShardingRule shardingRule, final InsertStatement insertStatement, final String generateKeyColumnName) {
         String tableName = insertStatement.getTables().getSingleTableName();
         GeneratedKey result = new GeneratedKey(generateKeyColumnName);

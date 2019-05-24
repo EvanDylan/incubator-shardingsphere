@@ -67,6 +67,7 @@ public final class InsertOptimizeEngine implements OptimizeEngine {
     @Override
     public OptimizeResult optimize() {
         List<AndCondition> andConditions = insertStatement.getRouteConditions().getOrCondition().getAndConditions();
+        // 获取生成ID的生成器
         Iterator<Comparable<?>> generatedKeys = createGeneratedKeys();
         List<ShardingCondition> shardingConditions = new ArrayList<>(andConditions.size());
         InsertOptimizeResult insertOptimizeResult = createInsertOptimizeResult();
@@ -78,8 +79,12 @@ public final class InsertOptimizeEngine implements OptimizeEngine {
             parametersCount = parametersCount + insertValue.getParametersCount();
             ShardingCondition shardingCondition = createShardingCondition(andConditions.get(i));
             insertOptimizeResult.addUnit(currentColumnValues, currentParameters);
+            /**
+             * 判断是否需要追加主键
+             */
             if (isNeededToAppendGeneratedKey()) {
                 Comparable<?> currentGeneratedKey = generatedKeys.next();
+                // 增加主键
                 fillWithGeneratedKeyName(insertOptimizeResult);
                 fillInsertOptimizeResultUnit(insertOptimizeResult.getUnits().get(i), currentGeneratedKey);
                 fillShardingCondition(shardingCondition, currentGeneratedKey);
