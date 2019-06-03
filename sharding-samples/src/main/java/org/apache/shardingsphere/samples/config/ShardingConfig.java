@@ -50,6 +50,7 @@ public class ShardingConfig {
         ShardingRuleConfiguration shardingRuleConfig = new ShardingRuleConfiguration();
         shardingRuleConfig.getTableRuleConfigs().add(getOrderTableRuleConfiguration());
         shardingRuleConfig.getTableRuleConfigs().add(getOrderItemTableRuleConfiguration());
+        shardingRuleConfig.getTableRuleConfigs().add(getUserTableRuleConfiguration());
         shardingRuleConfig.setMasterSlaveRuleConfigs(getMasterSlaveRuleConfigurations());
         shardingRuleConfig.getBindingTableGroups().add("t_order, t_order_item");
         shardingRuleConfig.setBroadcastTables(Collections.singleton("core_category"));
@@ -59,7 +60,18 @@ public class ShardingConfig {
     }
 
     /**
-     * t_order分表规则
+     * t_user分片规则
+     */
+    private TableRuleConfiguration getUserTableRuleConfiguration() {
+        TableRuleConfiguration userTableRuleConfig =
+                new TableRuleConfiguration("t_user", "ds-${0..1}.t_user");
+        userTableRuleConfig.setDatabaseShardingStrategyConfig(
+                new InlineShardingStrategyConfiguration("user_id", "ds-${user_id % 2}"));
+        return userTableRuleConfig;
+    }
+
+    /**
+     * t_order分片规则
      */
     private TableRuleConfiguration getOrderTableRuleConfiguration() {
         TableRuleConfiguration orderTableRuleConfig =
@@ -73,7 +85,7 @@ public class ShardingConfig {
     }
 
     /**
-     * t_order_item分表规则
+     * t_order_item分片规则
      * @return
      */
     private TableRuleConfiguration getOrderItemTableRuleConfiguration() {

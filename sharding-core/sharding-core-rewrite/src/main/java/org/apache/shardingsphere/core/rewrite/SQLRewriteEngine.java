@@ -151,7 +151,9 @@ public final class SQLRewriteEngine {
         if (sqlTokens.isEmpty()) {
             return appendOriginalLiterals(result);
         }
+        // 初始化不需要处理的sql
         appendInitialLiterals(!isSingleRouting, result);
+        // 追加sql和需要替换部分
         appendTokensAndPlaceholders(!isSingleRouting, result);
         reviseParameters();
         return result;

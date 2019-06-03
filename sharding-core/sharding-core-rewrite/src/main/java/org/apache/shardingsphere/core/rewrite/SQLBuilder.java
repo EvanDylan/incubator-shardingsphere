@@ -99,14 +99,18 @@ public final class SQLBuilder {
     public SQLUnit toSQL(final TableUnit tableUnit, final Map<String, String> logicAndActualTableMap, final ShardingRule shardingRule, final ShardingDataSourceMetaData shardingDataSourceMetaData) {
         StringBuilder result = new StringBuilder();
         List<Object> insertParameters = new LinkedList<>();
+        // segments中保持了需要做替换操作的占位符信息
         for (Object each : segments) {
             if (!(each instanceof ShardingPlaceholder)) {
                 result.append(each);
                 continue;
             }
+            // 逻辑表名
             String logicTableName = ((ShardingPlaceholder) each).getLogicTableName();
+            // 实际表名
             String actualTableName = logicAndActualTableMap.get(logicTableName);
             if (each instanceof TablePlaceholder) {
+                // 执行表名替换操作
                 appendTablePlaceholder((TablePlaceholder) each, actualTableName, result);
             } else if (each instanceof SchemaPlaceholder) {
                 appendSchemaPlaceholder(shardingRule, shardingDataSourceMetaData, actualTableName, result);

@@ -1,10 +1,14 @@
 package org.apache.shardingsphere.samples;
 
+import org.apache.shardingsphere.opentracing.ShardingTracer;
 import org.apache.shardingsphere.samples.po.Order;
 import org.apache.shardingsphere.samples.po.OrderItem;
+import org.apache.shardingsphere.samples.po.User;
 import org.apache.shardingsphere.samples.repository.CategoryMapper;
 import org.apache.shardingsphere.samples.repository.OrderItemMapper;
 import org.apache.shardingsphere.samples.repository.OrderMapper;
+import org.apache.shardingsphere.samples.repository.UserMapper;
+import org.apache.skywalking.apm.toolkit.opentracing.SkywalkingTracer;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Random;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @MapperScan("org.apache.shardingsphere.samples.repository")
@@ -31,8 +36,17 @@ public class Application {
     @Autowired
     private CategoryMapper categoryMapper;
 
+    @Autowired
+    private UserMapper userMapper;
+
     public static void main(String[] args) {
+        ShardingTracer.init(new SkywalkingTracer());
         SpringApplication.run(Application.class, args);
+    }
+
+    @GetMapping("/test")
+    public List<User> test() {
+        return userMapper.queryAllUserOrderByAge();
     }
 
     @GetMapping("/orders/{orderId}")
@@ -60,6 +74,7 @@ public class Application {
     public String init() {
         // 模拟一百个用户
         for (int userId = 1; userId < 101; userId++) {
+            userMapper.insertUser((long) userId, new Random().nextInt(100));
             // 每个用户下10单
             for (int orderCount = 1; orderCount < 11; orderCount++) {
                 Order order = new Order(null, (long) userId, "init");

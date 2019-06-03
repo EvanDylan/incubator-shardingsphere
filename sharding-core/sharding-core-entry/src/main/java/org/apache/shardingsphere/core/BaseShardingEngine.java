@@ -88,12 +88,21 @@ public abstract class BaseShardingEngine {
         }
         return result;
     }
-    
+
+    /**
+     * SQL重写
+     * @param sql
+     * @param parameters
+     * @param sqlRouteResult
+     * @return
+     */
     private Collection<RouteUnit> rewriteAndConvert(final String sql, final List<Object> parameters, final SQLRouteResult sqlRouteResult) {
         SQLRewriteEngine rewriteEngine = new SQLRewriteEngine(shardingRule, sql, databaseType, sqlRouteResult, parameters, sqlRouteResult.getOptimizeResult());
+        // 执行改写过程，并将执行中间结果保持至sqlBuilder中，需要执行替换的部分已占位符的形式保持
         SQLBuilder sqlBuilder = rewriteEngine.rewrite(sqlRouteResult.getRoutingResult().isSingleRouting());
         Collection<RouteUnit> result = new LinkedHashSet<>();
         for (TableUnit each : sqlRouteResult.getRoutingResult().getTableUnits().getTableUnits()) {
+            // 执行上面待替换部分，并真正需要执行的SQL语句
             result.add(new RouteUnit(each.getDataSourceName(), rewriteEngine.generateSQL(each, sqlBuilder, metaData.getDataSource())));
         }
         return result;
