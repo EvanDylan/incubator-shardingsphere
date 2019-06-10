@@ -3,11 +3,11 @@ package org.apache.shardingsphere.samples;
 import org.apache.shardingsphere.opentracing.ShardingTracer;
 import org.apache.shardingsphere.samples.po.Order;
 import org.apache.shardingsphere.samples.po.OrderItem;
-import org.apache.shardingsphere.samples.po.User;
 import org.apache.shardingsphere.samples.repository.CategoryMapper;
 import org.apache.shardingsphere.samples.repository.OrderItemMapper;
 import org.apache.shardingsphere.samples.repository.OrderMapper;
 import org.apache.shardingsphere.samples.repository.UserMapper;
+import org.apache.shardingsphere.samples.service.XATransactionService;
 import org.apache.skywalking.apm.toolkit.opentracing.SkywalkingTracer;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,14 +39,17 @@ public class Application {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private XATransactionService transactionService;
+
     public static void main(String[] args) {
         ShardingTracer.init(new SkywalkingTracer());
         SpringApplication.run(Application.class, args);
     }
 
     @GetMapping("/test")
-    public List<User> test() {
-        return userMapper.queryAllUserOrderByAge();
+    public void test() {
+        transactionService.xaTransaction();
     }
 
     @GetMapping("/orders/{orderId}")

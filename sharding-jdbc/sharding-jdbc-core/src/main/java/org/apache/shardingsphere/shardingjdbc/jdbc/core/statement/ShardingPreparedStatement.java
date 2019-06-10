@@ -123,12 +123,14 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
         if (null != currentResultSet) {
             return currentResultSet;
         }
+        // 通过获取在preparedStatementExecutor保持的连接池Statement，获取执行结果
         if (1 == preparedStatementExecutor.getStatements().size() && routeResult.getSqlStatement() instanceof DQLStatement) {
             currentResultSet = preparedStatementExecutor.getStatements().iterator().next().getResultSet();
             return currentResultSet;
         }
         List<ResultSet> resultSets = new ArrayList<>(preparedStatementExecutor.getStatements().size());
         List<QueryResult> queryResults = new ArrayList<>(preparedStatementExecutor.getStatements().size());
+        // 通过获取在preparedStatementExecutor保持的连接池Statement，获取执行结果
         for (Statement each : preparedStatementExecutor.getStatements()) {
             ResultSet resultSet = each.getResultSet();
             resultSets.add(resultSet);
