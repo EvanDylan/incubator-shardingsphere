@@ -62,14 +62,25 @@ public final class SingleXADataSource extends AbstractUnsupportedSingleXADataSou
     
     @Override
     public SingleXAConnection getXAConnection() throws SQLException {
+        // 如果是原生XA数据源则直接获取XA连接，否则进一步处理。
         return isOriginalXADataSource ? getXAConnectionFromXADataSource() : getXAConnectionFromNoneXADataSource();
     }
-    
+
+    /**
+     * 通过原生XA连接池获取XA连接
+     * @return
+     * @throws SQLException
+     */
     private SingleXAConnection getXAConnectionFromXADataSource() throws SQLException {
         XAConnection xaConnection = xaDataSource.getXAConnection();
         return new SingleXAConnection(resourceName, xaConnection.getConnection(), xaConnection);
     }
-    
+
+    /**
+     * 通过原生连接池进一步处理获取XA连接
+     * @return
+     * @throws SQLException
+     */
     private SingleXAConnection getXAConnectionFromNoneXADataSource() throws SQLException {
         Connection originalConnection = originalDataSource.getConnection();
         XAConnection xaConnection = XAConnectionFactory.createXAConnection(databaseType, xaDataSource, originalConnection);

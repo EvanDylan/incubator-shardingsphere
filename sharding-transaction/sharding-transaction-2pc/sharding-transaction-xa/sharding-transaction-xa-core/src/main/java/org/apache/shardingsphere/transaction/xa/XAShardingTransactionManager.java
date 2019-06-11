@@ -83,6 +83,7 @@ public final class XAShardingTransactionManager implements ShardingTransactionMa
     @SneakyThrows
     @Override
     public Connection getConnection(final String dataSourceName) {
+        // 获取XA连接
         SingleXAConnection singleXAConnection = singleXADataSourceMap.get(dataSourceName).getXAConnection();
         if (!enlistedXAResource.get().contains(dataSourceName)) {
             xaTransactionManager.enlistResource(singleXAConnection.getXAResource());

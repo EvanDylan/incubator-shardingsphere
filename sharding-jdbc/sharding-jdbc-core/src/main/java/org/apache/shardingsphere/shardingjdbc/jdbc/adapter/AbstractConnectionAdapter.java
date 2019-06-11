@@ -161,6 +161,7 @@ public abstract class AbstractConnectionAdapter extends AbstractUnsupportedOpera
     }
     
     private Connection createConnection(final String dataSourceName, final DataSource dataSource) throws SQLException {
+        // 判断是否为使用ShardingTransaction，如果是则通过SPI机制加载对应的事务管理器，如果不是则直接返回原生连接
         Connection result = isInShardingTransaction() ? shardingTransactionManager.getConnection(dataSourceName) : dataSource.getConnection();
         replayMethodsInvocation(result);
         return result;
